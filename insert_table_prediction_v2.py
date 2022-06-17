@@ -41,12 +41,15 @@ def get_current_price_buy_sell(currency):
 
 def insert_to_db_1(currency, time_interval, high, high_prediction, date_time_hit_high, low, low_prediction,
                    date_time_hit_low):
-    mycursor = mydb.cursor()
-    sql = "INSERT INTO predicted_high_low (currency, time_interval, high, high_prediction, date_time_hit_high, low, low_prediction, date_time_hit_low) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-    val = (currency, time_interval, high, high_prediction,
-           date_time_hit_high, low, low_prediction, date_time_hit_low)
-    mycursor.execute(sql, val)
-    mydb.commit()
+    try:
+        mycursor = mydb.cursor()
+        sql = "INSERT INTO predicted_high_low (currency, time_interval, high, high_prediction, date_time_hit_high, low, low_prediction, date_time_hit_low) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+        val = (currency, time_interval, high, high_prediction,
+               date_time_hit_high, low, low_prediction, date_time_hit_low)
+        mycursor.execute(sql, val)
+        mydb.commit()
+    except:
+        print("Error in inserting to db")
     # print(mycursor.rowcount, f" Record inserted successfully into table for {currency} at {time} for {time_interval} ")
 
     # except(Exception, psycopg.Error) as bulk_insert_error:
@@ -76,9 +79,12 @@ def fetch_data(currency):
 
 
 def update_sql(sql_query):
-    mycursor = mydb.cursor()
-    mycursor.execute(sql_query)
-    mydb.commit()
+    try:
+        mycursor = mydb.cursor()
+        mycursor.execute(sql_query)
+        mydb.commit()
+    except:
+        pass
     # print(mycursor.rowcount, "rows affected")
 
 
@@ -130,17 +136,19 @@ def max_check(currency, high, time_interval, currency_number, p_high, current_ti
 
         # create another table for historical predictions
         current_time_ = current_time.strftime("%Y-%m-%d %H:%M:%S")
-        print(type(current_time_))
         target_datetime_ = target_datetime.strftime("%Y-%m-%d %H:%M:%S")
         # print(current_time_)
-        _hist_query = f"INSERT INTO historical_data (actual_high, actual_low, currency, datetime_hit_high, predicted_high, predicted_low, target_datetime, current_time_," \
-                      f"time_interval, datetime_hit_low) " \
-                      f"VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        try:
+            _hist_query = f"INSERT INTO historical_data (actual_high, actual_low, currency, datetime_hit_high, predicted_high, predicted_low, target_datetime, current_time_," \
+                          f"time_interval, datetime_hit_low) " \
+                          f"VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
 
-        _hist_val = (high, 0, currency, _datetime_hit_high, p_high, 0, target_datetime_, current_time_, time_interval, None)
-        print("hist val", _hist_val)
-        _hist_cursor = mydb.cursor()
-        _hist_cursor.execute(_hist_query, _hist_val)
+            _hist_val = (high, 0, currency, _datetime_hit_high, p_high, 0, target_datetime_, current_time_, time_interval, None)
+            # print("hist val", _hist_val)
+            _hist_cursor = mydb.cursor()
+            _hist_cursor.execute(_hist_query, _hist_val)
+        except:
+            pass
 
 
 def min_check(currency, low, time_interval, currency_number, p_low, current_time, target_datetime):
@@ -161,13 +169,16 @@ def min_check(currency, low, time_interval, currency_number, p_low, current_time
         # print(pd.to_datetime(current_time))
         current_time_ = current_time.strftime("%Y-%m-%d %H:%M:%S")
         target_datetime_ = target_datetime.strftime("%Y-%m-%d %H:%M:%S")
-        _hist_query = f"INSERT INTO historical_data (current_time_, currency, time_interval, actual_high, actual_low, predicted_high, predicted_low, target_datetime, datetime_hit_high, datetime_hit_low) " \
-                      f"VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        _hist_val = (str(current_time), currency, time_interval, 0, low, 0, p_low, str(target_datetime), None, _datetime_hit_low)
-        print("__HIST_VALLL", _hist_val)
-        print(_hist_query)
-        _hist_cursor = mydb.cursor()
-        _hist_cursor.execute(_hist_query, _hist_val)
+        try:
+            _hist_query = f"INSERT INTO historical_data (current_time_, currency, time_interval, actual_high, actual_low, predicted_high, predicted_low, target_datetime, datetime_hit_high, datetime_hit_low) " \
+                          f"VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+            _hist_val = (str(current_time), currency, time_interval, 0, low, 0, p_low, str(target_datetime), None, _datetime_hit_low)
+            # print("__HIST_VALLL", _hist_val)
+            # print(_hist_query)
+            _hist_cursor = mydb.cursor()
+            _hist_cursor.execute(_hist_query, _hist_val)
+        except:
+            pass
 
 
 def update_actual_high_low(currency, time_):

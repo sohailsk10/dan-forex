@@ -27,9 +27,8 @@ for i in currency_ticks:
 
 prediction_list = []
 
+
 mydb = psycopg2.connect(database="postgres", user = "postgres", password = "forex@123", host = "34.66.176.253", port = "5432")
-# print(mydb)
-# conn = create_engine("postgresql+psycopg2://postgres:%s@34.66.176.253/postgres" % quote('forex@123'))
 
 
 def insert_to_db(time, currency, time_interval, actual_high, actual_low, predicted_high, predicted_low,target_datetime):
@@ -37,7 +36,6 @@ def insert_to_db(time, currency, time_interval, actual_high, actual_low, predict
         mycursor = mydb.cursor()
         sql = "INSERT INTO multiple_currency_interval_prediction (time, currency, time_interval, actual_high, actual_low, predicted_high, predicted_low, target_datetime) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
         val = (time, currency, time_interval, actual_high, actual_low, predicted_high, predicted_low, target_datetime)
-        print(sql, val)
         mycursor.execute(sql, val)
         mydb.commit()
         print(mycursor.rowcount, f" Record inserted successfully into table for {currency} at {time} for {time_interval} ")
@@ -185,19 +183,10 @@ while True:
                               int(utc_second))
 
     if utc_day_name != 'Sat' and utc_day_name != 'Sun':
-        mydb = psycopg2.connect(database="postgres", user="postgres", password="forex@123", host="34.66.176.253",
-                                port="5432")
-
         for currency in currency_ticks:
             for time_ in INTERVALS_LIST:
                 _minute = time_.split('Min')[0]
                 _minute = int(_minute)
-                # try:
-                #     _minute = time_[:2]
-                #     _minute = int(_minute)
-                # except:
-                #     _minute = time_[0]
-                # _minute = int(_minute)
                 og_df = get_data_mt5(currency, time_)
                 models = all_loaded_models[currency_ticks.index(currency)]
                 high_new_model = models[0]
